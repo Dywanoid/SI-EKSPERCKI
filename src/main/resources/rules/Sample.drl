@@ -1,0 +1,528 @@
+package com.sample
+
+import javax.swing.*;
+import org.kie.api.runtime.*;
+import java.util.ArrayList;
+
+
+declare enum Question
+    WHAT_TO_DO("What do you want to do?", ["Take a nap", "Laugh", "Cry", "Watch guys run around with swords", "All of the above", "..."]),
+      LAUGH("Do you find murder, dismemberement, and cannibalism...", ["Disturbing?", "Hilarious?"]),
+      	CROSS_DRESSING("Cross-dressing: Yea or Nay?",["Yea!", "Nay."]),
+      		YEA_TWINS("Twins?", ["No! No twins!","Twins are awesome."]),
+      			FOREST("Can it be set in a forest?", ["Oooh, yes, I love forests.", "Why not in a city, for a change?"]),
+      				WHO_IN_FOREST("Who is in the forest?", ["Shepards.", "Bandits."]),
+      		NAY_TWINS("How about twins?", ["How contrived.", "Sounds like fun!"]),
+      			MAGIC("Picky picky. How about magic?", ["There's no such thing.", "Oooo, I love magic!"]),
+      				LOVERS("Wow, you're a tough crowd. How do you like your lovers?", ["Over-educated.", "Quarrelsome.", "Reluctant.", "Married."]),
+      					QUARRELSOME("Violently quarrelsome?", ["No, just argumentative.", "Bring it on!"]),
+      					NUN("Is there a nun involved?", ["...maybe?", "What? No! That's weird!"]),
+      				KIND_OF_MAGIC("What kind of magic do you like?", ["Illusion!", "Fairies!", "Miracles!"]),
+      REVENGE("What's your opinion on revenge?", ["It's the best!", "It's pointless."]),
+      	DEATH_TOLLS("How do you like your death tolls?", ["High! Bring on the bloodbath!", "Moderate, with a side of angst.", "Very low. I'm squeamish."]),
+      	IMPORTANCE("What is the most important to you?", ["Love.", "Family.", "Power."]),
+      		LOVE_TYPE("Which is the best type of love?", ["Stupid immature love", "Stupid mature love", "Jealous obsession"]),
+      		PARENT("Pick a parent.", ["Mum.", "Dad."]),
+      		WORK_BEST_WITH("Who do you work best with?", ["Friends.", "Significant other.", "Everyone hates me."]),
+      ENGLISH_HISTORY("Isn't English history awesome???", ["Eh, I prefer the classics.","It really is!", "Um, I dunno..."]),
+      	ENGLISH_HISTORY_P2("No, it really is. trust me.", ["Ok."]),
+      	EXCOMMUNICATION("Is excommunication exciting?", ["Wow! Is it ever!", "Boooring."]),
+      		TIME("How much time do you have?", ["Just a few hours.", "I'm here all week!"]),
+      			TYPE_OF_BOYS("Do you like good guys or bad boys?", ["Good guys.", "Bad boys."]),
+      			PREFERENCE("Which do you prefer?", ["Coming of age journeys.", "Just lots and lots of battles."]),
+		OTHERS("...", ["I just want a nice story with shipwrecks and pirates and prostitutes in it.", "All this is a bit modern for me. Do you have anything more Chaucer-y?"]);
+    text : String
+    options : ArrayList
+end
+
+declare Answer
+    question : Question @key
+    choice : String
+end
+
+declare Result
+	text: String
+end
+
+//SUPPORT RULES
+rule "ASK"
+when
+	q: Question()
+then
+	Object[] options = q.getOptions().toArray();
+    int ans = JOptionPane.showOptionDialog(null, q.getText(), "Drama", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, 1);
+            
+    if(ans != JOptionPane.CLOSED_OPTION) {
+    	Answer answer = new Answer(q, (String)options[ans]);
+    	insert(answer);
+    }
+	
+end
+
+rule "SHOW"
+when
+	r: Result()
+then
+	JOptionPane.showMessageDialog(null, r.getText());
+end
+
+ 
+//Initializing
+rule "INIT"
+then
+    insert(Question.WHAT_TO_DO);
+end
+
+//Choices of WHAT_TO_DO
+rule "WHAT_TO_DO - nap"
+when
+    Answer(question == Question.WHAT_TO_DO, choice == "Take a nap")
+then
+	insert(new Result("Your play:\nHenry VIII"));
+end
+
+rule "WHAT_TO_DO - laugh"
+when
+    Answer(question == Question.WHAT_TO_DO, choice == "Laugh")
+then
+   insert(Question.LAUGH);
+end
+
+rule "WHAT_TO_DO - cry"
+when
+    Answer(question == Question.WHAT_TO_DO, choice == "Cry")
+then
+   insert(Question.REVENGE);
+end
+
+rule "WHAT_TO_DO - run around"
+when
+	Answer(question == Question.WHAT_TO_DO, choice == "Watch guys run around with swords")
+then
+	insert(Question.ENGLISH_HISTORY);
+end
+
+rule "WHAT_TO_DO - all"
+when
+	Answer(question == Question.WHAT_TO_DO, choice == "All of the above")
+then
+	insert(new Result("Your play:\nCymbeline"));
+end
+
+rule "WHAT_TO_DO - ..."
+when
+    Answer(question == Question.WHAT_TO_DO, choice == "...")
+then
+	insert(Question.OTHERS);
+end
+
+//Choices of LAUGH
+rule "LAUGH - disturbing"
+when
+    Answer(question == Question.LAUGH, choice == "Disturbing?")
+then
+   insert(Question.CROSS_DRESSING);
+end
+
+rule "LAUGH - hilarious"
+when
+    Answer(question == Question.LAUGH, choice == "Hilarious?")
+then
+	insert(new Result("Your play:\nTitus Andronicus"));
+end
+
+
+//Choices of CROSS_DRESSING
+rule "CROSS_DRESSING - yea"
+when
+    Answer(question == Question.CROSS_DRESSING, choice == "Yea!")
+then
+   insert(Question.YEA_TWINS);
+end
+
+rule "CROSS_DRESSING - nay"
+when
+    Answer(question == Question.CROSS_DRESSING, choice == "Nay.")
+then
+   insert(Question.NAY_TWINS);
+end
+
+//Choices of YEA_TWINS
+rule "YEA_TWINS - no twins"
+when
+    Answer(question == Question.YEA_TWINS, choice == "No! No twins!")
+then
+   insert(Question.FOREST);
+end
+
+rule "YEA_TWINS - awesome twins"
+when
+    Answer(question == Question.YEA_TWINS, choice == "Twins are awesome.")
+then
+	insert(new Result("Your play:\nTwelfth Night"));
+end
+
+//Choices of FOREST
+rule "FOREST - love forests"
+when
+    Answer(question == Question.FOREST, choice == "Oooh, yes, I love forests.")
+then
+   insert(Question.WHO_IN_FOREST);
+end
+
+rule "FOREST - no forest"
+when
+    Answer(question == Question.FOREST, choice == "Why not in a city, for a change?")
+then
+  	insert(new Result("Your play:\nThe Merchant of Venice"));
+end
+
+//Choices of WHO_IN_FOREST
+rule "WHO_IN_FOREST - shepards"
+when
+    Answer(question == Question.WHO_IN_FOREST, choice == "Shepards.")
+then
+   insert(new Result("Your play:\nAs You Like It"));
+end
+
+rule "WHO_IN_FOREST - bandits"
+when
+    Answer(question == Question.WHO_IN_FOREST, choice == "Bandits.")
+then
+  	insert(new Result("Your play:\nThe Two Gentleman of Verona"));
+end
+
+//Choices of NAY_TWINS
+rule "NAY_TWINS - contrived"
+when
+    Answer(question == Question.NAY_TWINS, choice == "How contrived.")
+then
+   insert(Question.MAGIC);
+end
+
+rule "NAY_TWINS - fun"
+when
+    Answer(question == Question.NAY_TWINS, choice == "Sounds like fun!")
+then
+	insert(new Result("Your play:\nThe Comedy of Errors"));
+end
+
+//Choices of MAGIC
+rule "MAGIC - no magic"
+when
+    Answer(question == Question.MAGIC, choice == "There's no such thing.")
+then
+   insert(Question.LOVERS);
+end
+
+rule "MAGIC - magic"
+when
+    Answer(question == Question.MAGIC, choice == "Oooo, I love magic!")
+then
+	insert(Question.KIND_OF_MAGIC);
+end
+
+//Choices of LOVERS
+rule "LOVERS - over-educated"
+when
+    Answer(question == Question.LOVERS, choice == "Over-educated.")
+then
+   insert(new Result("Your play:\nLove's Labour's Lost"));
+end
+
+rule "LOVERS - quarrelsome"
+when
+    Answer(question == Question.LOVERS, choice == "Quarrelsome.")
+then
+	insert(Question.QUARRELSOME);
+end
+
+rule "LOVERS - reluctant"
+when
+    Answer(question == Question.LOVERS, choice == "Reluctant.")
+then
+	insert(Question.NUN);
+end
+
+rule "LOVERS - married"
+when
+    Answer(question == Question.LOVERS, choice == "Married.")
+then
+	insert(new Result("Your play:\nThe Merry Wives of Windsor"));
+end
+
+//Choices of QUARRELSOME
+rule "QUARRELSOME - no"
+when
+    Answer(question == Question.QUARRELSOME, choice == "No, just argumentative.")
+then
+   insert(new Result("Your play:\nMuch Ado About Nothing"));
+end
+
+rule "QUARRELSOME - yes"
+when
+    Answer(question == Question.QUARRELSOME, choice == "Bring it on!")
+then
+	insert(new Result("Your play:\nThe Taming of the Shrew"));
+end
+
+//Choices of NUN
+rule "NUN - maybe"
+when
+    Answer(question == Question.NUN, choice == "...maybe?")
+then
+   insert(new Result("Your play:\nMeasure for Measure"));
+end
+
+rule "NUN - no"
+when
+    Answer(question == Question.NUN, choice == "What? No! That's weird!")
+then
+	insert(new Result("Your play:\nAll's Well That Ends Well"));
+end
+
+//Choices of KIND_OF_MAGIC
+rule "KIND_OF_MAGIC - illusion"
+when
+    Answer(question == Question.KIND_OF_MAGIC, choice == "Illusion!")
+then
+   insert(new Result("Your play:\nThe Tempest"));
+end
+
+rule "KIND_OF_MAGIC - fairies"
+when
+    Answer(question == Question.KIND_OF_MAGIC, choice == "Fairies!")
+then
+	insert(new Result("Your play:\nA Midsummer Night's Dream"));
+end
+
+rule "KIND_OF_MAGIC - miracles"
+when
+    Answer(question == Question.KIND_OF_MAGIC, choice == "Miracles!")
+then
+	insert(new Result("Your play:\nThe Winter's Tale"));
+end
+
+//Choices of REVENGE 
+rule "REVENGE - best"
+when
+    Answer(question == Question.REVENGE, choice == "It's the best!")
+then
+   insert(Question.DEATH_TOLLS);
+end
+
+rule "REVENGE - pointless"
+when
+    Answer(question == Question.REVENGE, choice == "It's pointless.")
+then
+   insert(Question.IMPORTANCE);
+end
+
+//Choices of DEATH_TOLLS 
+rule "DEATH_TOLLS - bloodbath"
+when
+    Answer(question == Question.DEATH_TOLLS, choice == "High! Bring on the bloodbath!")
+then
+   insert(new Result("Your play:\nTitus Andronicus"));
+end
+
+rule "DEATH_TOLLS - moderate"
+when
+    Answer(question == Question.DEATH_TOLLS, choice == "Moderate, with a side of angst.")
+then
+	insert(new Result("Your play:\nHamlet"));
+end
+
+rule "DEATH_TOLLS - low"
+when
+    Answer(question == Question.DEATH_TOLLS, choice == "Very low. I'm squeamish.")
+then
+	insert(new Result("Your play:\nTimon of Athens"));
+end
+
+//Choices of IMPORTANCE 
+rule "IMPORTANCE - love"
+when
+    Answer(question == Question.IMPORTANCE, choice == "Love.")
+then
+   insert(Question.LOVE_TYPE);
+end
+
+rule "IMPORTANCE - family"
+when
+    Answer(question == Question.IMPORTANCE, choice == "Family.")
+then
+   insert(Question.PARENT);
+end
+rule "IMPORTANCE - power"
+
+when
+    Answer(question == Question.IMPORTANCE, choice == "Power.")
+then
+   insert(Question.WORK_BEST_WITH);
+end
+
+
+//Choices of LOVE_TYPE 
+rule "LOVE_TYPE - immature"
+when
+    Answer(question == Question.LOVE_TYPE, choice == "Stupid immature love")
+then
+   insert(new Result("Your play:\nRomeo and Juliet"));
+end
+
+rule "LOVE_TYPE - mature"
+when
+    Answer(question == Question.LOVE_TYPE, choice == "Stupid mature love")
+then
+  	insert(new Result("Your play:\nAnthony and Cleopatra"));
+end
+
+rule "LOVE_TYPE - jealous"
+when
+    Answer(question == Question.LOVE_TYPE, choice == "Jealous obsession")
+then
+   insert(new Result("Your play:\nOthello"));
+end
+
+//Choices of PARENT 
+rule "PARENT - mum"
+when
+    Answer(question == Question.PARENT, choice == "Mum.")
+then
+   insert(new Result("Your play:\nCoriolanus"));
+end
+
+rule "PARENT - dad"
+when
+    Answer(question == Question.PARENT, choice == "Dad.")
+then
+   insert(new Result("Your play:\nKing Lear"));
+end
+
+//Choices of WORK_BEST_WITH 
+rule "WORK_BEST_WITH - friends"
+when
+    Answer(question == Question.WORK_BEST_WITH, choice == "Friends.")
+then
+   insert(new Result("Your play:\nJulius Caesar"));
+end
+
+rule "WORK_BEST_WITH - so"
+when
+    Answer(question == Question.WORK_BEST_WITH, choice == "Significant other.")
+then
+  	insert(new Result("Your play:\nMacbeth"));
+end
+
+rule "WORK_BEST_WITH - hate"
+when
+    Answer(question == Question.WORK_BEST_WITH, choice == "Everyone hates me.")
+then
+   insert(new Result("Your play:\nRichard II"));
+end
+
+//Choices of ENGLISH_HISTORY 
+rule "ENGLISH_HISTORY - classics"
+when
+    Answer(question == Question.ENGLISH_HISTORY, choice == "Eh, I prefer the classics.")
+then
+   insert(new Result("Your play:\nTroilus and Cressida"));
+end
+
+rule "ENGLISH_HISTORY - yes"
+when
+    Answer(question == Question.ENGLISH_HISTORY, choice == "It really is!")
+then
+  	insert(Question.EXCOMMUNICATION);
+end
+
+rule "ENGLISH_HISTORY - dunno"
+when
+    Answer(question == Question.ENGLISH_HISTORY, choice == "Um, I dunno...")
+then
+   insert(Question.ENGLISH_HISTORY_P2);
+end
+
+// Choices of ENGLISH_HISTORY
+rule "ENGLISH_HISTORY_P2 - dunno p2"
+when
+    Answer(question == Question.ENGLISH_HISTORY_P2, choice == "Ok.")
+then
+   insert(Question.EXCOMMUNICATION);
+end
+
+// Choices of EXCOMMUNICATION
+rule "EXCOMMUNICATION - wow"
+when
+    Answer(question == Question.EXCOMMUNICATION, choice == "Wow! Is it ever!")
+then
+   insert(new Result("Your play:\nKing John"));
+end
+
+rule "EXCOMMUNICATION - boring"
+when
+    Answer(question == Question.EXCOMMUNICATION, choice == "Boooring.")
+then
+   insert(Question.TIME);
+end
+
+// Choices of TIME
+rule "TIME - hours"
+when
+    Answer(question == Question.TIME, choice == "Just a few hours.")
+then
+   insert(Question.TYPE_OF_BOYS);
+end
+
+rule "TIME - week"
+when
+    Answer(question == Question.TIME, choice == "I'm here all week!")
+then
+   insert(Question.PREFERENCE);
+end
+
+// Choices of TYPE_OF_BOYS
+rule "TYPE_OF_BOYS - hours"
+when
+    Answer(question == Question.TYPE_OF_BOYS, choice == "Good guys.")
+then
+   insert(new Result("Your play:\nHenry V"));
+end
+
+rule "TYPE_OF_BOYS - week"
+when
+    Answer(question == Question.TYPE_OF_BOYS, choice == "Bad boys.")
+then
+   insert(new Result("Your play:\nRichard III"));
+end
+
+// Choices of PREFERENCE
+rule "PREFERENCE - hours"
+when
+    Answer(question == Question.PREFERENCE, choice == "Coming of age journeys.")
+then
+   insert(new Result("Your play:\nHenry IV, parts 1 & 2"));
+end
+
+rule "PREFERENCE - week"
+when
+    Answer(question == Question.PREFERENCE, choice == "Just lots and lots of battles.")
+then
+   insert(new Result("Your play:\nHenry VI, parts 1, 2 & 3"));
+end
+
+// Choices of OTHERS
+rule "OTHERS - hours"
+when
+    Answer(question == Question.OTHERS, choice == "I just want a nice story with shipwrecks and pirates and prostitutes in it.")
+then
+   insert(new Result("Your play:\nPericles, Prince of Tyre"));
+end
+
+rule "OTHERS - week"
+when
+    Answer(question == Question.OTHERS, choice == "All this is a bit modern for me. Do you have anything more Chaucer-y?")
+then
+   insert(new Result("Your play:\nThe Two Noble Kinsmen"));
+end
