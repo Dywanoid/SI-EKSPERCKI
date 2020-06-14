@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 
 declare enum Question
-    WHAT_TO_DO("What do you want to do?", ["Take a nap", "Laugh", "Cry", "Watch guys run around with swords", "All of the above", "..."]),
+    WHAT_TO_DO("What do you want to do?", ["Take a nap", "Laugh", "Cry", "Watch guys run around with swords", "All of the above", "Maybe something else...?"]),
       LAUGH("Do you find murder, dismemberement, and cannibalism...", ["Disturbing?", "Hilarious?"]),
       	CROSS_DRESSING("Cross-dressing: Yea or Nay?",["Yea!", "Nay."]),
       		YEA_TWINS("Twins?", ["No! No twins!","Twins are awesome."]),
@@ -30,7 +30,7 @@ declare enum Question
       		TIME("How much time do you have?", ["Just a few hours.", "I'm here all week!"]),
       			TYPE_OF_BOYS("Do you like good guys or bad boys?", ["Good guys.", "Bad boys."]),
       			PREFERENCE("Which do you prefer?", ["Coming of age journeys.", "Just lots and lots of battles."]),
-		OTHERS("...", ["I just want a nice story with shipwrecks and pirates and prostitutes in it.", "All this is a bit modern for me. Do you have anything more Chaucer-y?"]);
+		OTHERS("What do you want?", ["I just want a nice story with shipwrecks and pirates and prostitutes in it.", "All this is a bit modern for me. Do you have anything more Chaucer-y?"]);
     text : String
     options : ArrayList
 end
@@ -50,7 +50,7 @@ when
 	q: Question()
 then
 	Object[] options = q.getOptions().toArray();
-    int ans = JOptionPane.showOptionDialog(null, q.getText(), "Drama", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, 1);
+    int ans = JOptionPane.showOptionDialog(null, q.getText(), "Which Shakespeare play should you see?", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, 1);
             
     if(ans != JOptionPane.CLOSED_OPTION) {
     	Answer answer = new Answer(q, (String)options[ans]);
@@ -109,9 +109,9 @@ then
 	insert(new Result("Your play:\nCymbeline"));
 end
 
-rule "WHAT_TO_DO - ..."
+rule "WHAT_TO_DO - else"
 when
-    Answer(question == Question.WHAT_TO_DO, choice == "...")
+    Answer(question == Question.WHAT_TO_DO, choice == "Maybe something else...?")
 then
 	insert(Question.OTHERS);
 end

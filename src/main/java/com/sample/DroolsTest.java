@@ -11,17 +11,16 @@ import org.kie.api.runtime.KieSession;
 public class DroolsTest {
 
     public static final void main(String[] args) {
-        try {
-            // load up the knowledge base
-	        KieServices ks = KieServices.Factory.get();
-    	    KieContainer kContainer = ks.getKieClasspathContainer();
-        	KieSession kSession = kContainer.newKieSession("ksession-rules");
+	        try {
+			// load up the knowledge base
+			KieServices ks = KieServices.Factory.get();
+			KieContainer kContainer = ks.getKieClasspathContainer();
+			KieSession kSession = kContainer.newKieSession("ksession-rules");
 			KieRuntimeLogger kLogger = ks.getLoggers().newFileLogger(kSession, "test");
-
-            // go !
-            kSession.fireAllRules();
+			
+			// go !
+			kSession.fireAllRules();
 			kLogger.close();
-
         } catch (Throwable t) {
             t.printStackTrace();
         }
